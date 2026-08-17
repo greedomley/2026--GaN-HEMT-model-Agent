@@ -1,0 +1,64 @@
+# GaN HEMT Modeling Agent
+
+GaN HEMT 紧凑模型建模 Agent 自动化挑战赛项目框架。
+
+> 当前阶段：仅完成总体规划、架构分层与模块骨架。仓库中不包含实现代码、依赖声明、密钥、测试数据或可执行脚本。
+
+## 项目目标
+
+构建一个基于国产大模型、开源 Agent 框架和 Primarius Modeling MCP Server 的自动化建模系统，在限定时间内对两套未知 GaN HEMT 器件完成：
+
+1. 服务鉴权与建模会话建立。
+2. DC I-V、C-V、Pulse I-V、S 参数等数据审计。
+3. ASM-HEMT 模型初始化与分组参数提取。
+4. 拟合、物理 QA、回滚和 retune 迭代。
+5. 两套器件的鲁棒性调度与时间预算控制。
+6. 模型卡、运行日志和运行总结的生成与提交前校验。
+
+## 架构原则
+
+- **确定性约束优先**：参数范围、QA、回滚、停止条件和产物校验由确定性模块控制。
+- **Agent 负责决策**：大模型负责策略规划、异常诊断和下一步选择，不直接绕过领域约束。
+- **接口隔离**：MeQLab/MCP、国产大模型、存储和遥测均通过端口与适配器接入。
+- **全流程可恢复**：每个关键节点持久化状态和模型卡检查点，支持失败恢复。
+- **全流程可审计**：记录 MCP 调用、LLM 调用、决策序列、参数版本、QA 与误差变化。
+- **双器件鲁棒性**：优化目标兼顾平均成绩与较弱器件，不围绕单个器件过拟合。
+- **测试数据不落地**：正式测试数据保留在组委会服务器侧，本地只保存允许的元数据和产物。
+
+## 文档入口
+
+- [总体开发计划](docs/01-overall-development-plan.md)
+- [系统总体架构](docs/02-system-architecture.md)
+- [模块职责清单](docs/03-module-catalog.md)
+- [Agent 状态机与建模流程](docs/04-agent-workflow.md)
+- [契约与交付物规划](docs/05-contracts-and-artifacts.md)
+- [24 小时竞赛运行计划](docs/06-competition-runbook.md)
+- [待官方材料确认事项](docs/07-open-questions.md)
+
+## 项目结构
+
+```text
+gan-hemt-modeling-agent/
+├─ docs/                  总体规划、架构、流程、决策记录
+├─ src/
+│  ├─ entrypoints/        系统启动入口边界
+│  ├─ orchestration/      LangGraph 状态机、路由与检查点
+│  ├─ agents/             受约束的 Agent 角色
+│  ├─ application/        建模用例编排
+│  ├─ domain/             器件、参数、拟合、QA、评分等领域规则
+│  ├─ ports/              外部能力抽象接口
+│  ├─ adapters/           MCP 与国产大模型适配层
+│  ├─ infrastructure/     持久化、可观测性、容错与运行环境
+│  └─ governance/         合规、预算与产物校验
+├─ contracts/             MCP、模型卡、日志、总结等契约位置
+├─ config/                环境与策略配置位置
+├─ data/                  仅限自建合成、回归和测试夹具
+├─ artifacts/             模型卡、日志、QA 报告等运行产物
+├─ tests/                 单元、契约、集成、恢复、回归和竞赛演练
+└─ operations/            本地、测试日与故障恢复运行手册
+```
+
+## 当前边界
+
+本骨架没有预设官方模型卡 Schema、MCP 工具名、ASM-HEMT 具体参数名或 QA Checklist 内容。这些必须在取得组委会 Q&A、官方契约和开发环境后确认，不能凭经验写死。
+
